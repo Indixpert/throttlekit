@@ -1,11 +1,11 @@
 import pytest
 
 from throttlekit.algorithms import (
-    Algorithm,
     FixedWindowCounter,
     SlidingWindowLog,
     TokenBucket,
 )
+from throttlekit.algorithms.base import Algorithm
 
 
 @pytest.fixture(
@@ -20,6 +20,6 @@ from throttlekit.algorithms import (
         "TokenBucket",
     ],
 )
-def algorithm(request) -> Algorithm:
+def algorithm(request: pytest.FixtureRequest) -> Algorithm:
     """Fixture that provides an instance of each algorithm."""
     return request.param()

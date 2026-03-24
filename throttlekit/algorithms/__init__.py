@@ -6,7 +6,7 @@ from .token_bucket import TokenBucket
 __all__ = [
     "Algorithm",
     "RateLimitResult",
-    "TokenBucket",
-    "SlidingWindowLog",
     "FixedWindowCounter",
+    "SlidingWindowLog",
+    "TokenBucket",
 ]

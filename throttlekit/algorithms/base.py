@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -10,41 +12,39 @@ __all__ = ["Algorithm", "RateLimitResult"]
 class RateLimitResult:
     """
     The result of a rate limit check.
-
-    Attributes:
-        allowed: Whether the request is allowed.
-        remaining: The number of requests remaining in the current window.
-        reset_after: The number of seconds until the window resets.
-        retry_after: The number of seconds to wait before retrying.
-            This is only set if the request is not allowed.
     """
 
     allowed: bool
+    """Whether the request is allowed."""
+
     remaining: int
+    """The number of requests remaining in the current window."""
+
     reset_after: float
+    """The number of seconds until the rate limit resets."""
+
     retry_after: float | None = None
+    """The number of seconds to wait before retrying."""
 
 
 class Algorithm(ABC):
-    """Abstract base class for rate limiting algorithms."""
+    """
+    Abstract base class for all rate limiting algorithms.
+    """
 
     @abstractmethod
     def is_allowed(
-        self,
-        key: str,
-        limit: int,
-        window: int,
-        clock: Callable[[], float] = time.monotonic,
+        self, key: str, limit: int, window: int, *, clock: Callable[[], float] = time.monotonic
     ) -> RateLimitResult:
         """
         Checks if a request is allowed for a given key.
 
         Args:
-            key: The identifier for the rate limit.
-            limit: The maximum number of requests allowed.
+            key: A unique identifier for the entity being rate-limited.
+            limit: The maximum number of requests allowed in a window.
             window: The time window in seconds.
             clock: A callable that returns the current time in seconds.
-                Defaults to `time.monotonic`.
+                   Defaults to `time.monotonic`.
 
         Returns:
             A `RateLimitResult` instance.
