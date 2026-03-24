@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[test,fastapi,flask]
+    - name: Test with pytest
+      run: |
+        pytest
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for trusted publishing
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build
+    - name: Build package
+      run: python -m build
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+
+  deploy-docs:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - name: Install dependencies
+        run: pip install -e .[docs]
+      - name: Deploy docs
+        run: mkdocs gh-deploy --force
